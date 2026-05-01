@@ -81,6 +81,41 @@ Every DeFi protocol can be reduced to a set of mathematical properties that must
 | CROSS-1 | Oracle Manipulation Cost | Cost to manipulate oracle via AMM > profit from manipulated borrow |
 | CROSS-2 | Liquidation Price Manipulation | Oracle price drop must not enable profitable self-liquidation |
 
+### Staking (LST / Lido-style)
+
+| ID | Invariant | Description |
+|----|-----------|-------------|
+| ST1 | Pool Solvency | `total_staked ≥ total_supply × rate / PRECISION` — underlying always covers shares |
+| ST2 | No Mint Inflation | Staking N tokens must never mint more than `N / rate` shares |
+| ST3 | Stake No Instant Profit | Shares received reflect current rate, no free tokens |
+| ST4 | Exchange Rate Monotonic | Rate never decreases (rewards compound, no slashing between recalculations) |
+| ST5 | Unstake Delay Respected | Shares burned at `t_request` must wait until `t_request + delay` |
+| ST6 | Slash Bounded | Slashing must reduce rate proportionally to the slashed validator fraction |
+
+### StableSwap (Curve-style AMM)
+
+| ID | Invariant | Description |
+|----|-----------|-------------|
+| SS-1 | Reserve Non-Negativity | All reserves remain ≥ 0 after any operation |
+| SS-2 | No Free Output | Any swap with nonzero input must produce nonzero output |
+| SS-3 | Invariant Convergence | Newton-Raphson must converge within 255 iterations for valid inputs |
+| SS-4 | Amplification Effect | Higher A → lower slippage for balanced pools; lower A → higher slippage |
+| SS-5 | LP Proportionality | LP shares minted/burned proportional to deposit/withdrawal fraction of pool |
+| SS-6 | Fee Consistency | `hook_fees + protocol_fees ≤ gross_lp_fee` for any swap |
+
+### Precision & Rounding
+
+| ID | Invariant | Description |
+|----|-----------|-------------|
+| PREC-1 | Rounding Monotonic | Rounding direction must not reverse the sign of a transfer (deposit rounds down, withdraw rounds up) |
+| PREC-2 | Fee on Transfer | Token transfer fees must be accounted for, not lost in accounting |
+| PREC-3 | Decimal Consistency | All scaling operations use consistent decimal precision |
+| PREC-4 | Division Before Multiplication | Loss of precision from `(a/b)*c` instead of `(a*c)/b` |
+| PREC-5 | Share Price Manipulation | Exchange rate must not be manipulable by flash loan → deposit → withdraw |
+| PREC-6 | Exchange Rate Never Zero | `total_supply > 0 → exchange_rate > 0` |
+| PREC-7 | Dust Accumulation | Repeated rounding must not accumulate into extractable value |
+| PREC-8 | Rebasing Token Safety | Dynamic balanceOf must not corrupt internal accounting |
+
 ---
 
 ## CPI-Specific Checks (Solana/Anchor)
